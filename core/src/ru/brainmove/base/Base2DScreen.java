@@ -13,15 +13,17 @@ import ru.brainmove.math.Rect;
 
 public class Base2DScreen  implements Screen, InputProcessor {
 
-    // переменная для изменения координационной сетки
-    protected final float COORDINATE_NETWORK_CONST = 42f;
     protected SpriteBatch batch;
-    protected Matrix4 worldToGl;
-    protected Matrix3 screenToWorld;
+
     private Rect screenBounds; // границы области рисования в пикселях
     private Rect worldBounds; // границы проекции мировых координат
     private Rect glBounds; // дефолтные границы проекции мир - gl
+
+    protected Matrix4 worldToGl;
+    protected Matrix3 screenToWorld;
+
     private Vector2 touch = new Vector2();
+
 
     public Base2DScreen() {
         this.screenBounds = new Rect();
@@ -33,6 +35,7 @@ public class Base2DScreen  implements Screen, InputProcessor {
 
     @Override
     public void show() {
+        System.out.println("show");
         batch = new SpriteBatch();
         batch.getProjectionMatrix().idt();
         Gdx.input.setInputProcessor(this);
@@ -51,51 +54,55 @@ public class Base2DScreen  implements Screen, InputProcessor {
         screenBounds.setBottom(0);
 
         float aspect = width / (float) height;
-        worldBounds.setHeight(COORDINATE_NETWORK_CONST);
-        worldBounds.setWidth(COORDINATE_NETWORK_CONST * aspect);
+        worldBounds.setHeight(1f);
+        worldBounds.setWidth(1f * aspect);
         MatrixUtils.calcTransitionMatrix(worldToGl, worldBounds, glBounds);
         batch.setProjectionMatrix(worldToGl);
         MatrixUtils.calcTransitionMatrix(screenToWorld, screenBounds, worldBounds);
         resize(worldBounds);
     }
 
-    private void resize(Rect worldBounds) {
+    public void resize(Rect worldBounds) {
         System.out.println("resize worldBounds width = " + worldBounds.getWidth() + " worldBounds height = " + worldBounds.getHeight());
     }
 
     @Override
     public void pause() {
-
+        System.out.println("pause");
     }
 
     @Override
     public void resume() {
-
+        System.out.println("resume");
     }
 
     @Override
     public void hide() {
+        System.out.println("hide");
         dispose();
     }
 
     @Override
     public void dispose() {
+        System.out.println("dispose");
         batch.dispose();
-
     }
 
     @Override
     public boolean keyDown(int keycode) {
+        System.out.println("keyDown keycode = " + keycode);
         return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
+        System.out.println("keyUp keycode = " + keycode);
         return false;
     }
 
     @Override
     public boolean keyTyped(char character) {
+        System.out.println("keyTyped character = " + character);
         return false;
     }
 
@@ -107,8 +114,9 @@ public class Base2DScreen  implements Screen, InputProcessor {
         return false;
     }
 
-    private void touchDown(Vector2 touch, int pointer) {
+    public boolean touchDown(Vector2 touch, int pointer) {
         System.out.println("touchDown touch.x = " + touch.x + " touch.y = " + touch.y);
+        return false;
     }
 
     @Override
@@ -119,8 +127,9 @@ public class Base2DScreen  implements Screen, InputProcessor {
         return false;
     }
 
-    private void touchUp(Vector2 touch, int pointer) {
+    public boolean touchUp(Vector2 touch, int pointer) {
         System.out.println("touchUp touch.x = " + touch.x + " touch.y = " + touch.y);
+        return false;
     }
 
     @Override
@@ -131,8 +140,9 @@ public class Base2DScreen  implements Screen, InputProcessor {
         return false;
     }
 
-    private void touchDragged(Vector2 touch, int pointer) {
+    public boolean touchDragged(Vector2 touch, int pointer) {
         System.out.println("touchDragged touch.x = " + touch.x + " touch.y = " + touch.y);
+        return false;
     }
 
     @Override
