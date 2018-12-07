@@ -2,6 +2,8 @@ package ru.brainmove.screen;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -11,9 +13,14 @@ import com.badlogic.gdx.math.Vector2;
 import ru.brainmove.base.Base2DScreen;
 import ru.brainmove.math.Rect;
 import ru.brainmove.pool.BulletPool;
+import ru.brainmove.pool.EnemyShipPool;
 import ru.brainmove.sprite.Background;
+import ru.brainmove.sprite.EnemyShip;
 import ru.brainmove.sprite.MainShip;
 import ru.brainmove.sprite.Star;
+import ru.brainmove.utils.AnimateTimer;
+import ru.brainmove.utils.Regions;
+import ru.brainmove.utils.SoundUtils;
 
 
 public class GameScreen extends Base2DScreen {
@@ -31,13 +38,22 @@ public class GameScreen extends Base2DScreen {
 
     private BulletPool bulletPool;
 
+    private EnemyShipPool enemyShipPool;
+
+    private Sound fireSound;
+
+    private Music music;
+
     public GameScreen(Game game) {
         super(game);
     }
 
+    private AnimateTimer animateTimer;
+
     @Override
     public void show() {
         super.show();
+        animateTimer = new AnimateTimer(1f);
         textureAtlas = new TextureAtlas("textures/mainAtlas.tpack");
         bg = new Texture("textures/bg.png");
         background = new Background(new TextureRegion(bg));
@@ -45,8 +61,12 @@ public class GameScreen extends Base2DScreen {
         for (int i = 0; i < star.length; i++) {
             star[i] = new Star(textureAtlas);
         }
+        fireSound = Gdx.audio.newSound(Gdx.files.internal("sounds/gunSilencer.mp3"));
         bulletPool = new BulletPool();
-        mainShip = new MainShip(textureAtlas, bulletPool);
+        enemyShipPool = new EnemyShipPool();
+        mainShip = new MainShip(textureAtlas, bulletPool, fireSound);
+        music = SoundUtils.initMusic("sounds/music.mp3");
+        music.play();
     }
 
     @Override
@@ -63,6 +83,9 @@ public class GameScreen extends Base2DScreen {
         }
         mainShip.update(delta);
         bulletPool.updateActiveSprites(delta);
+        enemyShipPool.updateActiveSprites(delta);
+        if (animateTimer.checkInterval(delta))
+            addEnemyShip();
     }
 
     public void checkCollisions() {
@@ -70,6 +93,7 @@ public class GameScreen extends Base2DScreen {
     }
 
     public void deleteAllDestroyed() {
+        enemyShipPool.freeAllDestroyedActiveSprites();
         bulletPool.freeAllDestroyedActiveSprites();
     }
 
@@ -84,6 +108,7 @@ public class GameScreen extends Base2DScreen {
         }
         mainShip.draw(batch);
         bulletPool.drawActiveSprites(batch);
+        enemyShipPool.drawActiveSprites(batch);
         batch.end();
     }
 
@@ -102,6 +127,9 @@ public class GameScreen extends Base2DScreen {
         bg.dispose();
         textureAtlas.dispose();
         bulletPool.dispose();
+        enemyShipPool.dispose();
+        fireSound.dispose();
+        music.dispose();
         super.dispose();
     }
 
@@ -127,5 +155,21 @@ public class GameScreen extends Base2DScreen {
     public boolean keyUp(int keycode) {
         mainShip.keyUp(keycode);
         return super.keyUp(keycode);
+    }
+
+    @Override
+    public boolean touchDragged(Vector2 touch, int pointer) {
+        mainShip.touchDragged(touch, pointer);
+        return super.touchDragged(touch, pointer);
+    }
+
+    private void addEnemyShip() {
+
+        EnemyShip enemyShip = enemyShipPool.obtain();
+        enemyShip.set(Regions.split(textureAtlas.findRegion("enemy" + ((int) (Math.random() * 2.5f))), 1, 2, 2),
+                new Vector2(getWorldBounds().getLeft() + (getWorldBounds().getWidth() * (float) Math.random()), getWorldBounds().getTop()),
+                new Vector2(0, -0.5f),
+                0.1f,
+                getWorldBounds());
     }
 }

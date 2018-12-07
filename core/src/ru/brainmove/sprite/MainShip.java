@@ -1,6 +1,7 @@
 package ru.brainmove.sprite;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 
@@ -15,24 +16,38 @@ public class MainShip extends Sprite {
 
     private boolean pressedLeft;
     private boolean pressedRight;
+    private final Sound fire;
 
     private BulletPool bulletPool;
 
     private TextureAtlas atlas;
 
     private Rect worldBounds;
+    private boolean mousePressed;
+    private Vector2 currentMousePos = new Vector2();
 
-    public MainShip(TextureAtlas atlas, BulletPool bulletPool) {
+    public MainShip(TextureAtlas atlas, BulletPool bulletPool, Sound fire) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         setHeightProportion(0.15f);
         this.bulletPool = bulletPool;
         this.atlas = atlas;
+        this.mousePressed = false;
+        this.fire = fire;
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
-        pos.mulAdd(v, delta);
+        if (mousePressed) {
+            if (currentMousePos.x > pos.x)
+                moveRight();
+            else if (currentMousePos.x < pos.x)
+                moveLeft();
+            else
+                stop();
+        }
+        if (isInWorldByX(worldBounds, pos.cpy().mulAdd(v, delta).x))
+            pos.mulAdd(v, delta);
     }
 
     @Override
@@ -86,12 +101,22 @@ public class MainShip extends Sprite {
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer) {
-        return super.touchDown(touch, pointer);
+        mousePressed = true;
+        currentMousePos = touch;
+        return false;
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer) {
-        return super.touchUp(touch, pointer);
+        mousePressed = false;
+        stop();
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(Vector2 touch, int pointer) {
+        currentMousePos = touch;
+        return false;
     }
 
     private void moveRight() {
@@ -110,5 +135,6 @@ public class MainShip extends Sprite {
     public void shoot() {
         Bullet bullet = bulletPool.obtain();
         bullet.set(this, atlas.findRegion("bulletMainShip"), pos, new Vector2(0, 0.5f), 0.01f, worldBounds, 1);
+        fire.play();
     }
 }
