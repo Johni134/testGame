@@ -10,13 +10,15 @@ import com.badlogic.gdx.math.Vector2;
 
 import ru.brainmove.base.Base2DScreen;
 import ru.brainmove.math.Rect;
+import ru.brainmove.pool.BulletPool;
 import ru.brainmove.sprite.Background;
-import ru.brainmove.sprite.ButtonExit;
-import ru.brainmove.sprite.ButtonPlay;
+import ru.brainmove.sprite.MainShip;
 import ru.brainmove.sprite.Star;
 
-public class MenuScreen extends Base2DScreen {
-    private static final int STAR_COUNT = 256;
+
+public class GameScreen extends Base2DScreen {
+
+    private static final int STAR_COUNT = 64;
 
     private Texture bg;
     private TextureAtlas textureAtlas;
@@ -24,31 +26,34 @@ public class MenuScreen extends Base2DScreen {
     private Background background;
 
     private Star[] star;
-    private ButtonPlay buttonPlay;
-    private ButtonExit buttonExit;
 
-    public MenuScreen(Game game) {
+    private MainShip mainShip;
+
+    private BulletPool bulletPool;
+
+    public GameScreen(Game game) {
         super(game);
     }
 
     @Override
     public void show() {
         super.show();
-        textureAtlas = new TextureAtlas("textures/menuAtlas.tpack");
+        textureAtlas = new TextureAtlas("textures/mainAtlas.tpack");
         bg = new Texture("textures/bg.png");
-        buttonPlay = new ButtonPlay(textureAtlas, game);
-        buttonExit = new ButtonExit(textureAtlas);
         background = new Background(new TextureRegion(bg));
         star = new Star[STAR_COUNT];
         for (int i = 0; i < star.length; i++) {
             star[i] = new Star(textureAtlas);
         }
+        bulletPool = new BulletPool();
+        mainShip = new MainShip(textureAtlas, bulletPool);
     }
 
     @Override
     public void render(float delta) {
-        super.render(delta);
         update(delta);
+        checkCollisions();
+        deleteAllDestroyed();
         draw();
     }
 
@@ -56,6 +61,16 @@ public class MenuScreen extends Base2DScreen {
         for (int i = 0; i < star.length; i++) {
             star[i].update(delta);
         }
+        mainShip.update(delta);
+        bulletPool.updateActiveSprites(delta);
+    }
+
+    public void checkCollisions() {
+
+    }
+
+    public void deleteAllDestroyed() {
+        bulletPool.freeAllDestroyedActiveSprites();
     }
 
     public void draw() {
@@ -67,8 +82,8 @@ public class MenuScreen extends Base2DScreen {
         for (int i = 0; i < star.length; i++) {
             star[i].draw(batch);
         }
-        buttonPlay.draw(batch);
-        buttonExit.draw(batch);
+        mainShip.draw(batch);
+        bulletPool.drawActiveSprites(batch);
         batch.end();
     }
 
@@ -79,28 +94,38 @@ public class MenuScreen extends Base2DScreen {
         for (int i = 0; i < star.length; i++) {
             star[i].resize(worldBounds);
         }
-        buttonPlay.resize(worldBounds);
-        buttonExit.resize(worldBounds);
+        mainShip.resize(worldBounds);
     }
 
     @Override
     public void dispose() {
-        textureAtlas.dispose();
         bg.dispose();
+        textureAtlas.dispose();
+        bulletPool.dispose();
         super.dispose();
     }
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer) {
-        buttonPlay.touchDown(touch, pointer);
-        buttonExit.touchDown(touch, pointer);
+        mainShip.touchDown(touch, pointer);
         return super.touchDown(touch, pointer);
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer) {
-        buttonPlay.touchUp(touch, pointer);
-        buttonExit.touchUp(touch, pointer);
+        mainShip.touchUp(touch, pointer);
         return super.touchUp(touch, pointer);
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        mainShip.keyDown(keycode);
+        return super.keyDown(keycode);
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        mainShip.keyUp(keycode);
+        return super.keyUp(keycode);
     }
 }

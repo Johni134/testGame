@@ -1,5 +1,6 @@
 package ru.brainmove.base;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
@@ -24,8 +25,10 @@ public class Base2DScreen  implements Screen, InputProcessor {
 
     private Vector2 touch = new Vector2();
 
+    protected Game game;
 
-    public Base2DScreen() {
+    public Base2DScreen(Game game) {
+        this.game = game;
         this.screenBounds = new Rect();
         this.worldBounds = new Rect();
         this.glBounds = new Rect(0, 0, 1f, 1f);
