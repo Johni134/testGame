@@ -1,4 +1,4 @@
-package ru.brainmove.screen;
+package ru.brainmove.sprite;
 
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
