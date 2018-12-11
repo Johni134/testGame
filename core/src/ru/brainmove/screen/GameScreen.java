@@ -15,11 +15,10 @@ import ru.brainmove.math.Rect;
 import ru.brainmove.pool.BulletPool;
 import ru.brainmove.pool.EnemyShipPool;
 import ru.brainmove.sprite.Background;
-import ru.brainmove.sprite.EnemyShip;
 import ru.brainmove.sprite.MainShip;
 import ru.brainmove.sprite.Star;
 import ru.brainmove.utils.AnimateTimer;
-import ru.brainmove.utils.Regions;
+import ru.brainmove.utils.EnemiesEmitter;
 import ru.brainmove.utils.SoundUtils;
 
 
@@ -37,11 +36,12 @@ public class GameScreen extends Base2DScreen {
     private MainShip mainShip;
 
     private BulletPool bulletPool;
-
     private EnemyShipPool enemyShipPool;
 
-    private Sound fireSound;
+    private EnemiesEmitter enemiesEmitter;
 
+    private Sound fireSound;
+    private Sound enemySound;
     private Music music;
 
     public GameScreen(Game game) {
@@ -62,9 +62,11 @@ public class GameScreen extends Base2DScreen {
             star[i] = new Star(textureAtlas);
         }
         fireSound = Gdx.audio.newSound(Gdx.files.internal("sounds/gunSilencer.mp3"));
+        enemySound = Gdx.audio.newSound(Gdx.files.internal("sounds/enemyShot.mp3"));
         bulletPool = new BulletPool();
-        enemyShipPool = new EnemyShipPool();
         mainShip = new MainShip(textureAtlas, bulletPool, fireSound);
+        enemyShipPool = new EnemyShipPool(bulletPool, mainShip, worldBounds);
+        enemiesEmitter = new EnemiesEmitter(worldBounds, enemyShipPool, textureAtlas, enemySound);
         music = SoundUtils.initMusic("sounds/music.mp3");
         music.play();
     }
@@ -84,8 +86,7 @@ public class GameScreen extends Base2DScreen {
         mainShip.update(delta);
         bulletPool.updateActiveSprites(delta);
         enemyShipPool.updateActiveSprites(delta);
-        if (animateTimer.checkInterval(delta))
-            addEnemyShip();
+        enemiesEmitter.generate(delta);
     }
 
     public void checkCollisions() {
@@ -161,15 +162,5 @@ public class GameScreen extends Base2DScreen {
     public boolean touchDragged(Vector2 touch, int pointer) {
         mainShip.touchDragged(touch, pointer);
         return super.touchDragged(touch, pointer);
-    }
-
-    private void addEnemyShip() {
-
-        EnemyShip enemyShip = enemyShipPool.obtain();
-        enemyShip.set(Regions.split(textureAtlas.findRegion("enemy" + ((int) (Math.random() * 2.5f))), 1, 2, 2),
-                new Vector2(getWorldBounds().getLeft() + (getWorldBounds().getWidth() * (float) Math.random()), getWorldBounds().getTop()),
-                new Vector2(0, -0.5f),
-                0.1f,
-                getWorldBounds());
     }
 }
