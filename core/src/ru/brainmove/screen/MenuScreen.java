@@ -2,6 +2,7 @@ package ru.brainmove.screen;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -14,6 +15,7 @@ import ru.brainmove.sprite.Background;
 import ru.brainmove.sprite.ButtonExit;
 import ru.brainmove.sprite.ButtonPlay;
 import ru.brainmove.sprite.Star;
+import ru.brainmove.utils.SoundUtils;
 
 public class MenuScreen extends Base2DScreen {
     private static final int STAR_COUNT = 256;
@@ -27,6 +29,7 @@ public class MenuScreen extends Base2DScreen {
     private ButtonPlay buttonPlay;
     private ButtonExit buttonExit;
 
+    private Music introMusic;
     public MenuScreen(Game game) {
         super(game);
     }
@@ -43,6 +46,8 @@ public class MenuScreen extends Base2DScreen {
         for (int i = 0; i < star.length; i++) {
             star[i] = new Star(textureAtlas);
         }
+        introMusic = SoundUtils.initMusic("sounds/intro.mp3");
+        introMusic.play();
     }
 
     @Override
@@ -87,6 +92,7 @@ public class MenuScreen extends Base2DScreen {
     public void dispose() {
         textureAtlas.dispose();
         bg.dispose();
+        introMusic.dispose();
         super.dispose();
     }
 

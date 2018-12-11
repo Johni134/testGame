@@ -11,7 +11,6 @@ public class ButtonPlay extends ScaledButton {
 
     private Game game;
 
-
     public ButtonPlay(TextureAtlas atlas, Game game) {
         super(atlas.findRegion("btPlay"));
         setHeightProportion(0.2f);

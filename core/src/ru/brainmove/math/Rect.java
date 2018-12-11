@@ -100,6 +100,11 @@ public class Rect {
         return getLeft() > other.getRight() || getRight() < other.getLeft() || getBottom() > other.getTop() || getTop() < other.getBottom();
     }
 
+    public boolean isInWorldByX(Rect worldBounds, float x) {
+        return worldBounds.getRight() - getHalfWidth() > x
+                && worldBounds.getLeft() + getHalfWidth() < x;
+    }
+
     @Override
     public String toString() {
         return "Rectangle: pos" + pos + " size(" + getWidth() + ", " + getHeight() + ")";

@@ -69,6 +69,10 @@ public class Base2DScreen  implements Screen, InputProcessor {
         System.out.println("resize worldBounds width = " + worldBounds.getWidth() + " worldBounds height = " + worldBounds.getHeight());
     }
 
+    public Rect getWorldBounds() {
+        return worldBounds;
+    }
+
     @Override
     public void pause() {
         System.out.println("pause");
