@@ -7,17 +7,24 @@ import com.badlogic.gdx.math.Vector2;
 import ru.brainmove.base.Ship;
 import ru.brainmove.math.Rect;
 import ru.brainmove.pool.BulletPool;
+import ru.brainmove.pool.ExplosionPool;
 
 public class EnemyShip extends Ship {
 
-    private MainShip mainShip;
-    private Vector2 v0 = new Vector2();
+    private Vector2 descentV = new Vector2(0, -0.15f);
 
-    public EnemyShip(BulletPool bulletPool, MainShip mainShip, Rect worldBounds) {
+    private MainShip mainShip;
+
+    private Vector2 v0 = new Vector2();
+    private State state;
+
+    public EnemyShip(BulletPool bulletPool, ExplosionPool explosionPool, MainShip mainShip, Rect worldBounds, Sound shootSound) {
         this.bulletPool = bulletPool;
+        this.explosionPool = explosionPool;
         this.mainShip = mainShip;
         this.worldBounds = worldBounds;
         this.v.set(v0);
+        this.shootSound = shootSound;
     }
 
     public void set(
@@ -29,8 +36,7 @@ public class EnemyShip extends Ship {
             int bulletDamage,
             float reloadInterval,
             float height,
-            int hp,
-            Sound shootSound
+            int hp
     ) {
         this.regions = regions;
         this.v0.set(v0);
@@ -40,25 +46,43 @@ public class EnemyShip extends Ship {
         this.bulletDamage = bulletDamage;
         this.reloadInterval = reloadInterval;
         this.hp = hp;
-        this.shootSound = shootSound;
         setHeightProportion(height);
         reloadTimer = reloadInterval;
-        v.set(v0);
+        v.set(descentV);
+        state = State.DESCENT;
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
         pos.mulAdd(v, delta);
-        if (getTop() < worldBounds.getTop()) {
-            reloadTimer += delta;
-            if (reloadTimer >= reloadInterval) {
-                reloadTimer = 0f;
-                shoot();
-            }
-        }
-        if (isOutside(worldBounds)) {
-            setDestroyed(true);
+        switch (state) {
+            case DESCENT:
+                if (getTop() <= worldBounds.getTop()) {
+                    v.set(v0);
+                    state = State.FIGHT;
+                }
+                break;
+            case FIGHT:
+                reloadTimer += delta;
+                if (reloadTimer >= reloadInterval) {
+                    reloadTimer = 0f;
+                    shoot();
+                }
+                if (getBottom() <= worldBounds.getBottom()) {
+                    this.setDestroyed(true);
+                    boom();
+                }
+                break;
         }
     }
+
+    public boolean isBulletCollision(Rect bullet) {
+        return !(bullet.getRight() < getLeft()
+                || bullet.getLeft() > getRight()
+                || bullet.getBottom() > getTop()
+                || bullet.getTop() < pos.y);
+    }
+
+    private enum State {DESCENT, FIGHT}
 }
