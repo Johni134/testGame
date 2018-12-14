@@ -45,6 +45,13 @@ message_game_over
   orig: 493, 68
   offset: 0, 0
   index: -1
+message_new_game
+  rotate: false
+  xy: 506, 16
+  size: 374, 65
+  orig: 374, 65
+  offset: 0, 0
+  index: -1
 button_new_game
   rotate: false
   xy: 509, 20
