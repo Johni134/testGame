@@ -62,9 +62,9 @@ public class EnemiesEmitter {
         this.bulletRegion = atlas.findRegion("bulletEnemy");
     }
 
-    public void generate(float delta) {
+    public void generate(float delta, int level) {
         generateTimer += delta;
-        if (generateTimer >= generateInterval) {
+        if (generateTimer * (1 + level * 0.2) >= generateInterval) {
             generateTimer = 0f;
             EnemyShip enemy = enemyPool.obtain();
 
@@ -76,7 +76,7 @@ public class EnemiesEmitter {
                         bulletRegion,
                         ENEMY_SMALL_BULLET_HEIGHT,
                         ENEMY_SMALL_BULLET_VY,
-                        ENEMY_SMALL_BULLET_DAMAGE,
+                        ENEMY_SMALL_BULLET_DAMAGE * level,
                         ENEMY_SMALL_RELOAD_INTERVAL,
                         ENEMY_SMALL_HEIGHT,
                         ENEMY_SMALL_HP
@@ -88,7 +88,7 @@ public class EnemiesEmitter {
                         bulletRegion,
                         ENEMY_MEDIUM_BULLET_HEIGHT,
                         ENEMY_MEDIUM_BULLET_VY,
-                        ENEMY_MEDIUM_BULLET_DAMAGE,
+                        ENEMY_MEDIUM_BULLET_DAMAGE * level,
                         ENEMY_MEDIUM_RELOAD_INTERVAL,
                         ENEMY_MEDIUM_HEIGHT,
                         ENEMY_MEDIUM_HP
@@ -100,7 +100,7 @@ public class EnemiesEmitter {
                         bulletRegion,
                         ENEMY_BIG_BULLET_HEIGHT,
                         ENEMY_BIG_BULLET_VY,
-                        ENEMY_BIG_BULLET_DAMAGE,
+                        ENEMY_BIG_BULLET_DAMAGE * level,
                         ENEMY_BIG_RELOAD_INTERVAL,
                         ENEMY_BIG_HEIGHT,
                         ENEMY_BIG_HP

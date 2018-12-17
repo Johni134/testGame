@@ -25,6 +25,6 @@ public class NewGame extends ScaledButton {
 
     @Override
     protected void actionPerformed() {
-        gameScreen.startNewGame();
+        gameScreen.startNewGame(1);
     }
 }
