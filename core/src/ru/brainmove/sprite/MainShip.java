@@ -13,6 +13,7 @@ import ru.brainmove.pool.ExplosionPool;
 public class MainShip extends Ship {
 
     private static final int INVALID_POINTER = -1;
+    private final int FULL_HP = 100;
 
     private Vector2 v0 = new Vector2(0.5f, 0);
     private Vector2 v = new Vector2();
@@ -35,7 +36,11 @@ public class MainShip extends Ship {
         this.bulletHeight = 0.01f;
         this.bulletV.set(0, 0.5f);
         this.bulletDamage = 1;
-        this.hp = 100;
+        this.hp = FULL_HP;
+    }
+
+    public int getFullHp() {
+        return FULL_HP;
     }
 
     @Override
@@ -55,6 +60,7 @@ public class MainShip extends Ship {
             setLeft(worldBounds.getLeft());
             stop();
         }
+
     }
 
     @Override

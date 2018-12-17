@@ -20,10 +20,13 @@ import ru.brainmove.pool.ExplosionPool;
 import ru.brainmove.sprite.Background;
 import ru.brainmove.sprite.Bullet;
 import ru.brainmove.sprite.EnemyShip;
+import ru.brainmove.sprite.GameOver;
 import ru.brainmove.sprite.MainShip;
+import ru.brainmove.sprite.NewGame;
 import ru.brainmove.sprite.Star;
 import ru.brainmove.utils.AnimateTimer;
 import ru.brainmove.utils.EnemiesEmitter;
+import ru.brainmove.utils.HealthBar;
 import ru.brainmove.utils.SoundUtils;
 
 
@@ -40,6 +43,9 @@ public class GameScreen extends Base2DScreen {
 
     private MainShip mainShip;
 
+    private GameOver gameOver;
+    private NewGame newGame;
+
     private BulletPool bulletPool;
     private EnemyShipPool enemyShipPool;
     private ExplosionPool explosionPool;
@@ -50,6 +56,8 @@ public class GameScreen extends Base2DScreen {
     private Sound enemySound;
     private Sound explosionSound;
     private Music music;
+
+    private HealthBar healthBar;
 
     public GameScreen(Game game) {
         super(game);
@@ -74,10 +82,25 @@ public class GameScreen extends Base2DScreen {
         explosionPool = new ExplosionPool(textureAtlas, explosionSound);
         bulletPool = new BulletPool();
         mainShip = new MainShip(textureAtlas, bulletPool, explosionPool, fireSound);
+
         enemyShipPool = new EnemyShipPool(bulletPool, explosionPool, mainShip, worldBounds, enemySound);
         enemiesEmitter = new EnemiesEmitter(worldBounds, enemyShipPool, textureAtlas);
+
+        gameOver = new GameOver(textureAtlas);
+        newGame = new NewGame(textureAtlas, this);
+
+        healthBar = new HealthBar();
         music = SoundUtils.initMusic("sounds/music.mp3");
         music.play();
+    }
+
+    public void startNewGame() {
+        explosionPool.dispose();
+        enemyShipPool.dispose();
+        bulletPool.dispose();
+        mainShip.setLeft(worldBounds.getLeft() + worldBounds.getHalfWidth() - mainShip.getHalfWidth());
+        mainShip.setHp(mainShip.getFullHp());
+        mainShip.setDestroyed(false);
     }
 
     @Override
@@ -94,11 +117,11 @@ public class GameScreen extends Base2DScreen {
         }
         if (!mainShip.isDestroyed()) {
             mainShip.update(delta);
+            bulletPool.updateActiveSprites(delta);
+            enemyShipPool.updateActiveSprites(delta);
+            enemiesEmitter.generate(delta);
         }
-        bulletPool.updateActiveSprites(delta);
         explosionPool.updateActiveSprites(delta);
-        enemyShipPool.updateActiveSprites(delta);
-        enemiesEmitter.generate(delta);
     }
 
     public void checkCollisions() {
@@ -158,10 +181,17 @@ public class GameScreen extends Base2DScreen {
         for (int i = 0; i < star.length; i++) {
             star[i].draw(batch);
         }
-        mainShip.draw(batch);
-        bulletPool.drawActiveSprites(batch);
-        enemyShipPool.drawActiveSprites(batch);
-        explosionPool.drawActiveSprites(batch);
+        if (!mainShip.isDestroyed()) {
+            mainShip.draw(batch);
+            bulletPool.drawActiveSprites(batch);
+            enemyShipPool.drawActiveSprites(batch);
+            explosionPool.drawActiveSprites(batch);
+            healthBar.setCurMaxValue(mainShip.getHp(), mainShip.getFullHp());
+            healthBar.draw(batch, 1);
+        } else {
+            gameOver.draw(batch);
+            newGame.draw(batch);
+        }
         batch.end();
     }
 
@@ -173,6 +203,9 @@ public class GameScreen extends Base2DScreen {
             star[i].resize(worldBounds);
         }
         mainShip.resize(worldBounds);
+        healthBar.setPosition(worldBounds.getLeft(), worldBounds.getBottom());
+        healthBar.setSize(worldBounds.getWidth(), 0.01f);
+        newGame.resize(worldBounds);
     }
 
     @Override
@@ -190,12 +223,14 @@ public class GameScreen extends Base2DScreen {
     @Override
     public boolean touchDown(Vector2 touch, int pointer) {
         mainShip.touchDown(touch, pointer);
+        newGame.touchDown(touch, pointer);
         return super.touchDown(touch, pointer);
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer) {
         mainShip.touchUp(touch, pointer);
+        newGame.touchUp(touch, pointer);
         return super.touchUp(touch, pointer);
     }
 
